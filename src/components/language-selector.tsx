@@ -22,35 +22,35 @@ import {
 const themes = [
   {
     value: "javascript",
-    label: "Javascript (Node.js 12.14.0)",
+    label: "Javascript",
   },
   {
     value: "cpp",
-    label: "C++ (GCC 9.2.0)",
+    label: "C++",
   },
   {
     value: "csharp",
-    label: "C# (Mono 6.6.0.161)",  
+    label: "C#",  
   },
   {
     value: "go",
-    label: "Go (1.13.5)",
+    label: "Go",
   },
   {
     value: "java",
-    label: "Java (OpenJDK 13.0.1)",
+    label: "Java",
   },
   {
     value: "python",
-    label: "Python (2.7.17)",
+    label: "Python",
   },
   {
     value: "rust",
-    label: "Rust (1.40.0)",
+    label: "Rust",
   },
   {
     value: "typescript",
-    label: "TypeScript (3.7.4)",
+    label: "Typescript",
   },
 ]
 
