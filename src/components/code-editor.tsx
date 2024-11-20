@@ -19,8 +19,8 @@ export default function CodeEditor({ onChange, language, code, theme }: CodeEdit
     };
 
     return (
-        <div>
-            <Editor height="85vh" width={`100%`} language={language || "javascript"} theme={theme} value={value} onChange={(newValue) => handleEditorChange(newValue || "")} />
+        <div className="min-w-full">
+            <Editor options={{fontSize: 20, scrollBeyondLastLine: false, theme: theme as string}} className="rounded-xl text-lg" width={`100%`} language={language || "javascript"} theme={theme} value={value} onChange={(newValue) => handleEditorChange(newValue || "")} />
         </div>
     );
 };

@@ -36,29 +36,27 @@ export default function Home() {
             </div>
           </ResizablePanel>
           <ResizableHandle />
-          <ResizablePanel defaultSize={70}>
+          <ResizablePanel defaultSize={100} className="overflow-auto w-screen">
             <ResizablePanelGroup direction="vertical">
-              <ResizablePanel defaultSize={85}>
-                <div className="flex h-auto w-full items-center justify-center p-6">
-                  <div className="flex flex-col w-full">
-                    <div className="flex flex-row gap-4 m-2">
-                      <ThemeSelector
-                        selectedTheme={theme}
-                        onThemeChange={handleThemeChange}
-                      />
-                      <LanguageSelector
-                        selectedLanguage={language}
-                        onLanguageChange={setLanguage}
-                      />
-                    </div>
-                    <div className="flex-grow w-full">
-                      <CodeEditor
-                        language={language}
-                        code={code || ""}
-                        theme={theme}
-                        onChange={setCode}
-                      />
-                    </div>
+              <ResizablePanel defaultSize={85} className="overflow-auto w-screen">
+                <div className="flex flex-col h-full w-full">
+                  <div className="flex flex-row gap-4 m-2">
+                    <ThemeSelector
+                      selectedTheme={theme}
+                      onThemeChange={handleThemeChange}
+                    />
+                    <LanguageSelector
+                      selectedLanguage={language}
+                      onLanguageChange={setLanguage}
+                    />
+                  </div>
+                  <div className="flex flex-auto overflow-auto w-full">
+                    <CodeEditor
+                      language={language}
+                      code={code || ""}
+                      theme={theme}
+                      onChange={setCode}
+                    />
                   </div>
                 </div>
               </ResizablePanel>
