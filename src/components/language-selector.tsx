@@ -19,36 +19,44 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 
-const themes = [
+const languages = [
   {
+    id: 63,
     value: "javascript",
     label: "Javascript",
   },
   {
+    id: 54,
     value: "cpp",
     label: "C++",
   },
   {
+    id: 51,
     value: "csharp",
     label: "C#",  
   },
   {
+    id: 60,
     value: "go",
     label: "Go",
   },
   {
+    id: 62,
     value: "java",
     label: "Java",
   },
   {
+    id: 34,
     value: "python",
     label: "Python",
   },
   {
+    id: 73,
     value: "rust",
     label: "Rust",
   },
   {
+    id: 74,
     value: "typescript",
     label: "Typescript",
   },
@@ -71,7 +79,7 @@ export function LanguageSelector({ selectedLanguage, onLanguageChange }: Languag
           aria-expanded={open}
           className="w-[200px] justify-between"
         >
-          {selectedLanguage ? themes.find((theme) => theme.value === selectedLanguage)?.label : "Select theme..."}
+          {selectedLanguage ? languages.find((language) => language.value === selectedLanguage)?.label : "Select theme..."}
           <ChevronsUpDown className="opacity-50" />
         </Button>
       </PopoverTrigger>
@@ -81,20 +89,20 @@ export function LanguageSelector({ selectedLanguage, onLanguageChange }: Languag
           <CommandList>
             <CommandEmpty>No theme found.</CommandEmpty>
             <CommandGroup>
-              {themes.map((theme) => (
+              {languages.map((language) => (
                 <CommandItem
-                  key={theme.value}
-                  value={theme.value}
+                  key={language.value}
+                  value={language.value}
                   onSelect={(currentValue) => {
                     onLanguageChange(currentValue === selectedLanguage ? "" : currentValue)
                     setOpen(false)
                   }}
                 >
-                  {theme.label}
+                  {language.label}
                   <Check
                     className={cn(
                       "ml-auto",
-                      selectedLanguage === theme.value ? "opacity-100" : "opacity-0"
+                      selectedLanguage === language.value ? "opacity-100" : "opacity-0"
                     )}
                   />
                 </CommandItem>
@@ -106,3 +114,5 @@ export function LanguageSelector({ selectedLanguage, onLanguageChange }: Languag
     </Popover>
   )
 }
+
+export default languages;
