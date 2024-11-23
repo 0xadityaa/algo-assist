@@ -67,7 +67,34 @@ export async function POST(request: Request) {
 
     const result = await response.json();
     console.log("Judge0 response:", result);
-    return NextResponse.json(result);
+
+    // Extract tokens from the result
+    const tokens = result.map((submission: { token: string }) => submission.token);
+
+    // Make GET requests for each token
+    const results = await Promise.all(tokens.map(async (token: string) => {
+        const maxAttempts = 2; // Maximum number of attempts
+        let attempts = 0;
+        let resultResponse;
+
+        while (attempts < maxAttempts) {
+            resultResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/get-result?token=${token}`);
+            
+            if (resultResponse.ok) {
+                return resultResponse.json(); // Return the JSON response if successful
+            }
+
+            attempts++;
+            console.log(`Attempt ${attempts} failed. Retrying in 2 seconds...`);
+            await new Promise(resolve => setTimeout(resolve, 2000)); // Wait for 2 seconds before retrying
+        }
+
+        console.error(`Failed to fetch result for token: ${token} after ${maxAttempts} attempts.`);
+        return null; // Return null or handle the error as needed
+    }));
+
+    console.log("Final Results:", results);
+    return NextResponse.json(results);
   } catch (error) {
     console.error("Server error:", error);
     return NextResponse.json(

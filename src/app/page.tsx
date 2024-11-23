@@ -24,78 +24,84 @@ export default function Home() {
     setTheme(newTheme);
   };
 
-const handleRunClick = async () => {
-  console.log("Running code...");
-  try {
-    // First, log what we're about to send
-    console.log("Original Code:", code);
-    console.log("Language:", language);
-    
-    // Convert language ID to string and validate
-    const languageId = String(getLanguageId(language));
-    
-    if (!languageId) {
-      throw new Error("Invalid language selected");
-    }
+  const handleRunClick = async () => {
+    console.log("Running code...");
+    try {
+      // First, log what we're about to send
+      console.log("Original Code:", code);
+      console.log("Language:", language);
 
-    // Create the request body exactly as Judge0 expects
-    const requestPayload = {
-      submissions: [
-        {
-          expected_output: "hello wrld",
-          language_id: languageId,
-          source_code: code,
-          stdin: "wrld"
+      // Convert language ID to string and validate
+      const languageId = String(getLanguageId(language));
+
+      if (!languageId) {
+        throw new Error("Invalid language selected");
+      }
+
+      // Create the request body exactly as Judge0 expects
+      const requestPayload = {
+        submissions: [
+          {
+            expected_output: "hello wrld",
+            language_id: languageId,
+            source_code: code,
+            stdin: "wrld",
+          },
+          {
+            expected_output: "hello ",
+            language_id: languageId,
+            source_code: code,
+            stdin: "",
+          },
+        ],
+      };
+
+      // Log the actual payload being sent
+      console.log("Sending payload:", requestPayload);
+
+      const response = await fetch("/api/run-code", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
-        {
-          expected_output: "hello ",
-          language_id: languageId,
-          source_code: code,
-          stdin: ""
-        }
-      ]
-    };
+        body: JSON.stringify(requestPayload),
+      });
 
-    // Log the actual payload being sent
-    console.log("Sending payload:", requestPayload);
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("API Error:", errorData);
+        throw new Error(errorData.error || "Network response was not ok");
+      }
 
-    const response = await fetch("/api/run-code", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(requestPayload)
-    });
+      const result = await response.json();
+      console.log("Submission Result:", result);
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      console.error("API Error:", errorData);
-      throw new Error(errorData.error || "Network response was not ok");
+      // Get the final results using the tokens
+      if (result.submissions) {
+        const tokens = result.submissions.map(
+          (sub: { token: unknown }) => sub.token
+        );
+
+        // Wait a bit for Judge0 to process
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+
+        // Join tokens into a single string
+        const tokenString = tokens.join(',');
+
+        // Fetch results using the token string
+        const resultResponse = await fetch(
+          `${process.env.NEXT_PUBLIC_BASE_URL}/api/get-result?tokens=${tokenString}`
+        );
+
+        // Parse the response
+        const results = await resultResponse.json();
+
+        console.log("Final Results:", results);
+      }
+    } catch (error) {
+      console.error("Error running code:", error);
     }
-
-    const result = await response.json();
-    console.log("Submission Result:", result);
-
-    // Get the final results using the tokens
-    if (result.submissions) {
-      const tokens = result.submissions.map((sub: { token: unknown; }) => sub.token);
-      
-      // Wait a bit for Judge0 to process
-      await new Promise(resolve => setTimeout(resolve, 2000));
-
-      // Get results for all tokens
-      const results = await Promise.all(tokens.map(async (token: unknown) => {
-        const resultResponse = await fetch(`/api/get-result?token=${token}`);
-        return resultResponse.json();
-      }));
-
-      console.log("Final Results:", results);
-    }
-    
-  } catch (error) {
-    console.error("Error running code:", error);
-  }
-};
+  };
 
   return (
     <div>
