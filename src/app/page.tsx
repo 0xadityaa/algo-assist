@@ -1,7 +1,7 @@
 "use client";
 import CodeEditor from "@/components/code-editor";
 import { ThemeSelector } from "@/components/theme-selector";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { defineTheme } from "@/lib/theme-handler";
 import languages, { LanguageSelector } from "@/components/language-selector";
 import {
@@ -16,6 +16,8 @@ export default function Home() {
   const [code, setCode] = useState("");
   const [theme, setTheme] = useState("vs-dark");
   const [language, setLanguage] = useState(languages[0].value);
+  const [isRunning, setIsRunning] = useState(false);
+  const [results, setResults] = useState(null);
 
   const handleThemeChange = async (newTheme: string) => {
     if (newTheme) {
@@ -25,6 +27,7 @@ export default function Home() {
   };
 
   const handleRunClick = async () => {
+    setIsRunning(true);
     console.log("Running code...");
     try {
       // First, log what we're about to send
@@ -75,7 +78,8 @@ export default function Home() {
 
       const result = await response.json();
       console.log("Submission Result:", result);
-
+      setResults(result);
+      
       // Get the final results using the tokens
       if (result.submissions) {
         const tokens = result.submissions.map(
@@ -95,13 +99,20 @@ export default function Home() {
 
         // Parse the response
         const results = await resultResponse.json();
-
         console.log("Final Results:", results);
+        setResults(results);
+        console.log("Updated results state:", results);
       }
     } catch (error) {
       console.error("Error running code:", error);
+    } finally {
+      setIsRunning(false);
     }
   };
+
+  useEffect(() => {
+    console.log("Results state updated:", results);
+  }, [results]);
 
   return (
     <div>
@@ -137,6 +148,7 @@ export default function Home() {
                       value={"Run"}
                       variant={"outline"}
                       onClick={handleRunClick}
+                      disabled={isRunning}
                     >
                       {" "}
                       Run{" "}
@@ -155,7 +167,13 @@ export default function Home() {
               <ResizableHandle />
               <ResizablePanel defaultSize={15}>
                 <div className="flex h-full items-center justify-center p-6">
-                  <span className="font-semibold">Test cases / Output</span>
+                  {/* <span className="font-semibold">Test cases / Output</span> */}
+                  <br/><br/>
+                  {results ? (
+                    <code>{JSON.stringify(results)}</code>
+                  ) : (
+                    <p>No results to display.</p>
+                  )}
                 </div>
               </ResizablePanel>
             </ResizablePanelGroup>
