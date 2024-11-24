@@ -11,6 +11,8 @@ import {
 } from "@/components/ui/resizable";
 import { Button } from "@/components/ui/button";
 import { getLanguageId } from "@/lib/lang-utils";
+import  Question  from "@/app/questions/two-sum.mdx";
+import {MDXProvider} from "@mdx-js/react";
 
 export default function Home() {
   const [code, setCode] = useState("");
@@ -45,16 +47,16 @@ export default function Home() {
       const requestPayload = {
         submissions: [
           {
-            expected_output: "hello wrld",
+            expected_output: "[0, 1]",
             language_id: languageId,
             source_code: code,
-            stdin: "wrld",
+            stdin: "[2,7,11,15], 9",
           },
           {
-            expected_output: "hello ",
+            expected_output: "[1,2]",
             language_id: languageId,
             source_code: code,
-            stdin: "",
+            stdin: "[3,3], 6",
           },
         ],
       };
@@ -122,10 +124,12 @@ export default function Home() {
           direction="horizontal"
           className="rounded-lg border w-{`95%`}"
         >
-          <ResizablePanel defaultSize={30}>
-            <div className="flex h-[200px] items-center justify-center p-6">
-              <span className="font-semibold">Questions</span>
-            </div>
+          <ResizablePanel defaultSize={55}>
+            <MDXProvider>
+              <article className="prose flex flex-col h-auto w-auto items-start justify-start p-6 space-y-4 overflow-y-scroll">
+                <Question />
+              </article>
+            </MDXProvider>
           </ResizablePanel>
           <ResizableHandle />
           <ResizablePanel defaultSize={100} className="overflow-auto w-screen">
