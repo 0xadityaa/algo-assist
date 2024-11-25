@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { getLanguageId } from "@/lib/lang-utils";
 import  Question  from "@/app/questions/two-sum.mdx";
 import {MDXProvider} from "@mdx-js/react";
+import { ModeToggle } from "@/components/ui/theme-toggle";
 
 export default function Home() {
   const [code, setCode] = useState("");
@@ -118,7 +119,10 @@ export default function Home() {
 
   return (
     <div>
-      <h1 className="text-3xl font-bold m-4">Algo Assist</h1>
+      <div className="flex flex-row justify-between items-center m-4">
+        <h1 className="text-3xl font-bold m-4">Algo Assist</h1>
+        <ModeToggle />
+      </div>
       <div className="w-full h-screen">
         <ResizablePanelGroup
           direction="horizontal"
@@ -126,7 +130,7 @@ export default function Home() {
         >
           <ResizablePanel defaultSize={55}>
             <MDXProvider>
-              <article className="prose flex flex-col h-auto w-auto items-start justify-start p-6 space-y-4 overflow-y-scroll">
+              <article className="prose flex flex-col h-screen w-auto items-start justify-start p-6 space-y-4 overflow-y-scroll dark:prose-invert">
                 <Question />
               </article>
             </MDXProvider>
@@ -150,12 +154,13 @@ export default function Home() {
                     />
                     <Button
                       value={"Run"}
-                      variant={"outline"}
+                      variant={"default"}
                       onClick={handleRunClick}
                       disabled={isRunning}
+                      className="text-green-600 font-mono font-bold"
                     >
                       {" "}
-                      Run{" "}
+                      RUN{" "}
                     </Button>
                   </div>
                   <div className="flex flex-auto overflow-auto w-full">
