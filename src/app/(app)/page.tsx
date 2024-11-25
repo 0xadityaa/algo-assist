@@ -185,7 +185,7 @@ export default function Home() {
                 </div>
               </ResizablePanel>
               <ResizableHandle />
-              <ResizablePanel defaultSize={15}>
+              <ResizablePanel defaultSize={15} suppressHydrationWarning={true}>
                 <h2 className="text-xl font-bold m-4">Output</h2>
                     <div className="flex h-full w-auto items-center justify-start overflow-x-auto">
                       {results ? (

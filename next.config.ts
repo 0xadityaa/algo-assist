@@ -1,5 +1,7 @@
 import type { NextConfig } from "next";
 import createMDX from "@next/mdx";
+import { withPayload } from '@payloadcms/next/withPayload'
+
 
 const withMDX = createMDX({
   options: {
@@ -13,5 +15,5 @@ const nextConfig: NextConfig = {
   pageExtensions: ["js", "jsx", "md", "mdx", "ts", "tsx"],
 };
 
-export default withMDX(nextConfig);
+export default withPayload(withMDX(nextConfig));
 
