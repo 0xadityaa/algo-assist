@@ -26,7 +26,7 @@ export default function CodeEditor({
         className="rounded-xl text-lg"
         width={`100%`}
         language={language}
-        theme={theme}
+        theme={theme || "blackboard"}
         value={code} // Bind the value to the code state
         onChange={(value) => setCode(value ?? "")} // Update the state on change
       />

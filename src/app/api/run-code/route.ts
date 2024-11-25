@@ -34,11 +34,10 @@ export async function POST(request: Request) {
 
     // Prepare submissions with proper base64 encoding
     const judgeSubmissions = requestBody.submissions.map((submission) => ({
-      language_id: submission.language_id,
-      // Properly encode the source code
-      source_code: Buffer.from(submission.source_code).toString("base64"),
-      stdin: Buffer.from(submission.stdin).toString("base64"),
-      expected_output: Buffer.from(submission.expected_output),
+      "language_id": submission.language_id,
+      "source_code": Buffer.from(submission.source_code).toString('base64'),
+      "stdin": Buffer.from(submission.stdin).toString('base64'),
+      "expected_output": Buffer.from(submission.expected_output).toString('base64'),
     }));
 
     console.log("Prepared Judge0 submissions:", judgeSubmissions);
@@ -52,7 +51,7 @@ export async function POST(request: Request) {
           Accept: "application/json",
           Authorization: `Bearer ${apiKey}`,
         },
-        body: JSON.stringify({ submissions: judgeSubmissions }),
+        body: JSON.stringify({ "submissions": judgeSubmissions }),
       }
     );
 
@@ -73,7 +72,7 @@ export async function POST(request: Request) {
       (submission: { token: string }) => submission.token
     );
 
-    await new Promise((resolve) => setTimeout(resolve, 5000)); // Wait for 2 seconds before retrying
+    await new Promise((resolve) => setTimeout(resolve, 5000)); // Wait for 5 seconds before retrying
 
     // Make GET requests for each token
     const results = await Promise.all(
@@ -88,7 +87,34 @@ export async function POST(request: Request) {
           );
 
           if (resultResponse.ok) {
-            return resultResponse.json(); // Return the JSON response if successful
+            const resultData = await resultResponse.json();
+            
+            // Log the result data to inspect its structure
+            console.log("Result Data:", resultData);
+
+            // Decode the expected output
+            const expectedOutput = judgeSubmissions.find(sub => 
+              sub.source_code === resultData.source_code
+            )?.expected_output;
+
+            console.log("Expected Output (before decoding):", expectedOutput);
+
+            const actualOutput = resultData.stdout; // Assuming stdout contains the output
+
+            // Decode the expected output from base64
+            const decodedExpectedOutput = expectedOutput ? Buffer.from(expectedOutput, 'base64').toString() : null;
+
+            console.log("Decoded Expected Output:", decodedExpectedOutput);
+            console.log("Actual Output:", actualOutput);
+
+            if (decodedExpectedOutput && actualOutput) {
+              const isAccepted = decodedExpectedOutput.trim() === actualOutput.trim(); // Trim to avoid whitespace issues
+              return {
+                ...resultData,
+                status: isAccepted ? 'Accepted' : 'Wrong Answer',
+              };
+            }
+            return resultData; // Return the result if no expected output is found
           }
 
           attempts++;

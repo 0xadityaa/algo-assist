@@ -21,8 +21,8 @@ import {
 
 const themes = [
   {
-    value: "vs-dark",
-    label: "VS Dark",
+    value: "solarized-light",
+    label: "Solarized Light",
   },
   {
     value: "blackboard",
@@ -33,8 +33,8 @@ const themes = [
     label: "Github",
   },
   {
-    value: "monokai-bright",
-    label: "Monokai Bright",  
+    value: "night-owl",
+    label: "Night Owl",  
   },
   {
     value: "monokai",
@@ -78,8 +78,10 @@ export function ThemeSelector({ selectedTheme, onThemeChange }: ThemeSelectorPro
                   key={theme.value}
                   value={theme.value}
                   onSelect={(currentValue) => {
-                    onThemeChange(currentValue === selectedTheme ? "" : currentValue)
-                    setOpen(false)
+                    if (currentValue !== selectedTheme) {
+                      onThemeChange(currentValue);
+                    }
+                    setOpen(false);
                   }}
                 >
                   {theme.label}

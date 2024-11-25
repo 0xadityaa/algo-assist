@@ -11,58 +11,75 @@ import {
 } from "@/components/ui/resizable";
 import { Button } from "@/components/ui/button";
 import { getLanguageId } from "@/lib/lang-utils";
-import  Question  from "@/app/questions/two-sum.mdx";
-import {MDXProvider} from "@mdx-js/react";
+import Question from "@/app/questions/two-sum.mdx";
+import { MDXProvider } from "@mdx-js/react";
 import { ModeToggle } from "@/components/ui/theme-toggle";
 
+interface SubmissionResult {
+  status: { description: string };
+  time: number;
+  memory: number;
+  stdout?: string | null;
+  stderr?: string | null;
+}
+
+interface Results {
+  submissions: SubmissionResult[];
+}
+
 export default function Home() {
-  const [code, setCode] = useState("");
-  const [theme, setTheme] = useState("vs-dark");
-  const [language, setLanguage] = useState(languages[0].value);
-  const [isRunning, setIsRunning] = useState(false);
-  const [results, setResults] = useState(null);
+  const [code, setCode] = useState<string>("");
+  const [theme, setTheme] = useState<string>("blackboard");
+  const [language, setLanguage] = useState<string>(languages[0].value);
+  const [isRunning, setIsRunning] = useState<boolean>(false);
+  const [results, setResults] = useState<Results[] | null>(null);
+
+  useEffect(() => {
+  const applyTheme = async () => {
+    await defineTheme(theme);
+  };
+  applyTheme();
+});
 
   const handleThemeChange = async (newTheme: string) => {
     if (newTheme) {
       await defineTheme(newTheme);
+      setTheme(newTheme);
+    } else {
+      console.error("Invalid theme selected:", newTheme);
     }
-    setTheme(newTheme);
   };
 
   const handleRunClick = async () => {
     setIsRunning(true);
     console.log("Running code...");
     try {
-      // First, log what we're about to send
       console.log("Original Code:", code);
       console.log("Language:", language);
 
-      // Convert language ID to string and validate
       const languageId = String(getLanguageId(language));
 
       if (!languageId) {
         throw new Error("Invalid language selected");
       }
 
-      // Create the request body exactly as Judge0 expects
       const requestPayload = {
         submissions: [
           {
-            expected_output: "[0, 1]",
-            language_id: languageId,
-            source_code: code,
-            stdin: "[2,7,11,15], 9",
+            "expected_output": "[0,1]",
+            "language_id": languageId,
+            "source_code": code,
+            "stdin": "[2,7,11,15]\n9",
           },
           {
-            expected_output: "[1,2]",
-            language_id: languageId,
-            source_code: code,
-            stdin: "[3,3], 6",
+            "expected_output": "[0,1]",
+            "language_id": languageId,
+            "source_code": code,
+            "stdin": "[3,3]\n6",
           },
         ],
       };
 
-      // Log the actual payload being sent
       console.log("Sending payload:", requestPayload);
 
       const response = await fetch("/api/run-code", {
@@ -82,25 +99,20 @@ export default function Home() {
       const result = await response.json();
       console.log("Submission Result:", result);
       setResults(result);
-      
-      // Get the final results using the tokens
+
       if (result.submissions) {
         const tokens = result.submissions.map(
-          (sub: { token: unknown }) => sub.token
+          (sub: { token: string }) => sub.token
         );
 
-        // Wait a bit for Judge0 to process
-        await new Promise((resolve) => setTimeout(resolve, 2000));
+        await new Promise((resolve) => setTimeout(resolve, 5000));
 
-        // Join tokens into a single string
         const tokenString = tokens.join(',');
 
-        // Fetch results using the token string
         const resultResponse = await fetch(
           `${process.env.NEXT_PUBLIC_BASE_URL}/api/get-result?tokens=${tokenString}`
         );
 
-        // Parse the response
         const results = await resultResponse.json();
         console.log("Final Results:", results);
         setResults(results);
@@ -130,7 +142,7 @@ export default function Home() {
         >
           <ResizablePanel defaultSize={55}>
             <MDXProvider>
-              <article className="prose flex flex-col h-screen w-auto items-start justify-start p-6 space-y-4 overflow-y-scroll dark:prose-invert">
+              <article className="prose flex flex-col h-screen w-auto items-start justify-start p-6 space-y-4 overflow-y-scroll dark:prose-invert text-lg">
                 <Question />
               </article>
             </MDXProvider>
@@ -140,7 +152,7 @@ export default function Home() {
             <ResizablePanelGroup direction="vertical">
               <ResizablePanel
                 defaultSize={85}
-                className="overflow-auto w-screen"
+                className="overflow-auto w-full"
               >
                 <div className="flex flex-col h-full w-full">
                   <div className="flex flex-row gap-4 m-2">
@@ -154,16 +166,15 @@ export default function Home() {
                     />
                     <Button
                       value={"Run"}
-                      variant={"default"}
+                      variant={"outline"}
                       onClick={handleRunClick}
                       disabled={isRunning}
                       className="text-green-600 font-mono font-bold"
                     >
-                      {" "}
-                      RUN{" "}
+                      RUN
                     </Button>
                   </div>
-                  <div className="flex flex-auto overflow-auto w-full">
+                  <div className="flex flex-auto overflow-auto w-full p-1">
                     <CodeEditor
                       language={language}
                       code={code}
@@ -175,14 +186,35 @@ export default function Home() {
               </ResizablePanel>
               <ResizableHandle />
               <ResizablePanel defaultSize={15}>
-                <div className="flex h-full items-center justify-center p-6">
-                  {/* <span className="font-semibold">Test cases / Output</span> */}
-                  <br/><br/>
-                  {results ? (
-                    <code>{JSON.stringify(results)}</code>
-                  ) : (
-                    <p>No results to display.</p>
-                  )}
+                <h2 className="text-xl font-bold m-4">Output</h2>
+                    <div className="flex h-full w-auto items-center justify-start overflow-x-auto">
+                      {results ? (
+                        <div className="flex flex-row overflow-x-auto m-5 space-x-4">
+                          {results.map((result: Results, index: number) => (
+                            <div key={index} className="border p-4 mb-2 rounded min-w-[300px]">
+                              <h3 className="font-bold">Test Case {index + 1}</h3>
+                              <p>Status: {result.submissions[0].status.description}</p>
+                              <p>Time: {result.submissions[0].time} seconds</p>
+                              <p>Memory: {result.submissions[0].memory} KB</p>
+                              <p>Expected Output:</p>
+                              {result.submissions[0].stdout && (
+                                <div>
+                                  <h4 className="font-semibold">Output:</h4>
+                                  <pre>{Buffer.from(result.submissions[0].stdout, 'base64').toString()}</pre>
+                                </div>
+                              )}
+                              {result.submissions[0].stderr && (
+                                <div>
+                                  <h4 className="font-semibold text-red-500">Error:</h4>
+                                  <pre>{Buffer.from(result.submissions[0].stderr, 'base64').toString()}</pre>
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p>No results to display.</p>
+                      )}
                 </div>
               </ResizablePanel>
             </ResizablePanelGroup>
