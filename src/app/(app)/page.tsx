@@ -14,6 +14,7 @@ import { getLanguageId } from "@/lib/lang-utils";
 import Question from "@/app/questions/two-sum.mdx";
 import { MDXProvider } from "@mdx-js/react";
 import { ModeToggle } from "@/components/ui/theme-toggle";
+import { useAuth } from '@/hooks/useAuth';
 
 interface SubmissionResult {
   status: { description: string };
@@ -28,6 +29,8 @@ interface Results {
 }
 
 export default function Home() {
+  useAuth();
+
   const [code, setCode] = useState<string>("");
   const [theme, setTheme] = useState<string>("blackboard");
   const [language, setLanguage] = useState<string>(languages[0].value);
