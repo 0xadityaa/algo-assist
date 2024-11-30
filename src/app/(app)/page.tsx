@@ -118,9 +118,9 @@ export default function Home() {
 
             const requestPayload = {
                 submissions: [
-                    ...testCases.map((testCase: { test: string; }) => {
+                    ...testCases.map((testCase: { test?: string | undefined | null; id?: string | undefined | null; }) => {
                         try {
-                            const parsedTest = JSON.parse(testCase.test);
+                            const parsedTest = JSON.parse(testCase?.test || "");
                             return {
                                 "expected_output": parsedTest.expected_output || "",
                                 "language_id": languageId,
@@ -198,9 +198,10 @@ export default function Home() {
     const {logout} = useAuth();
 
     const handleLogout = async () => {
-        await logout();
+        await logout().then(() => {
         // Then redirect 
         router.push('/auth');
+        });
       };
 
     return (
@@ -362,7 +363,7 @@ export default function Home() {
                                             <div className="flex flex-row overflow-x-auto space-x-4">
                                                 {questions?.[0]?.tests && results?.map((result, index) => {
 
-                                                    const parsedTest = JSON.parse(questions[0].tests[index].test); // Access parsed test case
+                                                    const parsedTest = JSON.parse(questions[0].tests[index].test || ""); // Access parsed test case
                                                     return (
                                                         <div key={index} className="border p-4 mb-2 rounded min-w-[300px]">
                                                             <h3
