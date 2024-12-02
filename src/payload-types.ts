@@ -138,6 +138,7 @@ export interface Question {
     };
     [k: string]: unknown;
   } | null;
+  body_html?: string | null;
   tests?:
     | {
         test?: string | null;
@@ -281,6 +282,7 @@ export interface QuestionsSelect<T extends boolean = true> {
   topics?: T;
   companies?: T;
   body?: T;
+  body_html?: T;
   tests?:
     | T
     | {
