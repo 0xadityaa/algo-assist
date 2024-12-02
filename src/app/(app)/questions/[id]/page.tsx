@@ -54,14 +54,13 @@ export default function Home() {
 
   useEffect(() => {
     const fetchQuestions = async () => {
-      if (!questionId) return;
       try {
         // Fetch a single question by ID
-        const response = await fetch(`/api/questions?questionId=${questionId}`); // Assuming you have a dynamic route for questions
+        const response = await fetch(`/api/questions/${questionId}`);
         if (response.ok) {
           const data = await response.json();
           console.log("Fetched question data:", data);
-          setQuestions(data); // Wrap the single question in an array
+          setQuestions([data]); // Wrap the single question in an array since our UI expects an array
         } else {
           const errorMessage = `Failed to fetch questions: ${response.status}`;
           console.error(errorMessage);
@@ -241,31 +240,47 @@ export default function Home() {
         <ResizablePanelGroup
           direction="horizontal"
           className="rounded-lg border w-{`95%`}"
+          suppressHydrationWarning={true}
         >
           <ResizablePanel defaultSize={55}>
             {questions && questions.length > 0 && (
               <article className="w-auto m-4 space-y-6 p-2 overflow-y-scroll">
                 <h2 className="text-2xl font-bold">{questions[0].title}</h2>
-                <b>Difficulty:</b> <Badge variant={"default"}>
+                <b>Difficulty:</b>{" "}
+                <Badge variant={"default"}>
                   {questions[0].difficulty?.toLocaleLowerCase()}
-                </Badge><br/>
+                </Badge>
+                <br />
                 <>
-                  <b>Topics:{" "}</b>
+                  <b>Topics: </b>
                   {questions[0].topics?.map((topic) => (
-                    <Badge key={topic.id} variant={"secondary"}>
-                      {topic.name.toLocaleLowerCase()}
-                    </Badge>
+                    typeof topic === 'object' && topic !== null ? (
+                      <Badge key={topic.id} variant={"secondary"}>
+                        {topic.name.toLocaleLowerCase()}
+                      </Badge>
+                    ) : null
                   ))}
-                </><br/>
+                </>
+                <br />
                 <>
-                <b>Companies:{" "}</b>
-                {questions[0].companies?.map((company) => (
-                  <Badge key={company.id} variant={"outline"}>
-                    {company.name.toLocaleLowerCase()}
-                  </Badge>
-                ))}
-                </><br/><br/>
-                <div dangerouslySetInnerHTML={{ __html: questions[0].body_html }} />
+                  <b>Companies: </b>
+                  {questions[0].companies?.map((company) => (
+                    typeof company === 'object' && company !== null ? (
+                      <Badge key={company.id} variant={"outline"}>
+                        {company.name.toLocaleLowerCase()}
+                      </Badge>
+                    ) : (
+                      <Badge key={company} variant={"outline"}>
+                        {company}
+                      </Badge>
+                    )
+                  ))}
+                </>
+                <br />
+                <br />
+                <div
+                  dangerouslySetInnerHTML={{ __html: questions[0].body_html as TrustedHTML }}
+                />
               </article>
             )}
           </ResizablePanel>
@@ -326,49 +341,50 @@ export default function Home() {
                   </h2>
                   <div className="flex h-auto w-auto items-center justify-start overflow-x-auto p-4">
                     {results ? (
-                      <div className="flex flex-row overflow-x-auto space-x-4">
+                      <div className="space-y-4">
                         {questions?.[0]?.tests &&
-                          results?.map((result, index) => {
-                            const parsedTest = JSON.parse(
-                              questions[0].tests[index].test
-                            ); // Access parsed test case
+                          questions[0].tests.map((testCase, index) => {
+                            const parsedTest = JSON.parse(testCase.test as string);
+                            return (
+                              <div
+                                key={index}
+                                className="border p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow"
+                              >
+                                <h3 className="font-bold text-lg mb-2">
+                                  Test Case {index + 1}
+                                </h3>
+                                <div className="space-y-2">
+                                  <p>
+                                    <span className="font-medium">Input:</span>{" "}
+                                    {parsedTest.stdin}
+                                  </p>
+                                  <p>
+                                    <span className="font-medium">
+                                      Expected Output:
+                                    </span>{" "}
+                                    {parsedTest.expected_output}
+                                  </p>
+                                </div>
+                              </div>
+                            );
+                          })}
+                      </div>
+                    ) : isRunning ? (
+                      <Loading />
+                    ) : (
+                      <div className="flex flex-row space-x-2">
+                        {questions?.[0]?.tests &&
+                          questions[0].tests.map((testCase, index) => {
+                            const parsedTest = JSON.parse(testCase.test as string);
                             return (
                               <div
                                 key={index}
                                 className="border p-4 mb-2 rounded min-w-[300px]"
                               >
-                                <h3
-                                  className={`font-bold ${
-                                    result.submissions[0]?.status
-                                      ?.description === "Accepted"
-                                      ? "text-green-500"
-                                      : "text-red-500"
-                                  }`}
-                                >
-                                  {/* Accessing status from the submissions array within result */}
-                                  Test Case {index + 1}:{" "}
-                                  {result.submissions[0]?.status?.description ||
-                                    "Status not available"}
-                                  {result.submissions[0]?.status
-                                    ?.description === "Accepted"
-                                    ? " ✅"
-                                    : " ❌"}
+                                <h3 className="font-bold">
+                                  Test Case {index + 1}
                                 </h3>
-                                <p>
-                                  Time: {result.submissions[0]?.time || "N/A"}{" "}
-                                  seconds
-                                </p>
-                                <p>
-                                  Memory:{" "}
-                                  {result.submissions[0]?.memory || "N/A"} KB
-                                </p>
-                                <code>
-                                  Your Output:{" "}
-                                  {Buffer.from(
-                                    result.submissions[0]?.stdout || "",
-                                    "base64"
-                                  ).toString()}
-                                </code>
+                                <code>Input: {parsedTest.stdin}</code>
                                 <br />
                                 <code>
                                   Expected Output: {parsedTest.expected_output}
@@ -377,10 +393,6 @@ export default function Home() {
                             );
                           })}
                       </div>
-                    ) : isRunning ? (
-                      <Loading />
-                    ) : (
-                      <p className="m-4">No results to display.</p>
                     )}
                   </div>
                 </div>

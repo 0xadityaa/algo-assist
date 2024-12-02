@@ -20,7 +20,8 @@ const QuestionsPage = () => {
         const response = await fetch("/api/questions");
         if (response.ok) {
           const fetchedQuestions = await response.json();
-          setQuestions(fetchedQuestions as Question[]);
+          console.log("API Response:", fetchedQuestions);
+          setQuestions(fetchedQuestions.docs as Question[]);
         } else {
           const errorMessage = await response.text();
           console.error("Error fetching questions:", errorMessage);
