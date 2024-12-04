@@ -9,9 +9,6 @@ const Questions: CollectionConfig = {
   },
   access: {
     read: () => true,
-    create: () => true,
-    update: () => true,
-    delete: () => true,
   },
   fields: [
     {
@@ -27,7 +24,7 @@ const Questions: CollectionConfig = {
         { label: 'Medium', value: 'medium' },
         { label: 'Hard', value: 'hard' },
       ],
-      defaultValue: 'easy',
+      required: true,
     },
     {
       name: 'author',
@@ -39,6 +36,7 @@ const Questions: CollectionConfig = {
       type: 'relationship',
       relationTo: 'topics',
       hasMany: true,
+      required: true,
     },
     {
       name: 'companies',
@@ -57,6 +55,7 @@ const Questions: CollectionConfig = {
           HTMLConverterFeature({}),
         ],
       }),
+      required: true,
     },
     lexicalHTML('body', { name: 'body_html' }),
     {
@@ -68,6 +67,7 @@ const Questions: CollectionConfig = {
           type: 'text',
         },
       ],
+      required: true,
     },
   ],
 };

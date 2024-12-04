@@ -9,15 +9,18 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useRouter } from "next/navigation";
+import Loading from "@/components/ui/loading";
 
 const QuestionsPage = () => {
   const [questions, setQuestions] = useState<Question[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     const fetchQuestions = async () => {
       try {
-        const response = await fetch("/api/questions");
+        const response = await fetch("/api/questions?populate=topics.name,companies.name,author.name&depth=3");
         if (response.ok) {
           const fetchedQuestions = await response.json();
           console.log("API Response:", fetchedQuestions);
@@ -32,8 +35,9 @@ const QuestionsPage = () => {
       } catch (error: unknown) {
         console.error("Error fetching questions:", error);
         setError(
-          (error as Error)?.message ||
-            "An error occurred while fetching questions."
+          error instanceof Error
+            ? error.message
+            : "An error occurred while fetching questions."
         );
       }
     };
@@ -46,7 +50,7 @@ const QuestionsPage = () => {
   }
 
   if (!questions) {
-    return <div>Loading questions...</div>;
+    return <Loading text="Loading Questions..." />;
   }
 
   return (
@@ -57,21 +61,13 @@ const QuestionsPage = () => {
           <TableRow>
             <TableHead>Title</TableHead>
             <TableHead>Difficulty</TableHead>
-            <TableHead>Topics</TableHead>
-            <TableHead>Companies</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {questions.map((question) => (
-            <TableRow key={question.id}>
+            <TableRow key={question.id} onClick={() => {router.push(`/questions/${question.id}`)}}>
               <TableCell>{question.title}</TableCell>
               <TableCell>{question.difficulty}</TableCell>
-              <TableCell>{(question.topics?.map((topic) => 
-                typeof topic === 'object' && topic !== null ? topic.name : ''
-              ))}</TableCell>
-              <TableCell>{(question.companies?.map((company) => 
-                typeof company === 'object' && company !== null ? company.name : ''
-              ))}</TableCell>
             </TableRow>
           ))}
         </TableBody>

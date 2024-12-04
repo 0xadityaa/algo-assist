@@ -119,11 +119,11 @@ export interface Media {
 export interface Question {
   id: number;
   title: string;
-  difficulty?: ('easy' | 'medium' | 'hard') | null;
+  difficulty: 'easy' | 'medium' | 'hard';
   author?: (number | null) | User;
-  topics?: (number | Topic)[] | null;
+  topics: (number | Topic)[];
   companies?: (number | Company)[] | null;
-  body?: {
+  body: {
     root: {
       type: string;
       children: {
@@ -137,14 +137,12 @@ export interface Question {
       version: number;
     };
     [k: string]: unknown;
-  } | null;
+  };
   body_html?: string | null;
-  tests?:
-    | {
-        test?: string | null;
-        id?: string | null;
-      }[]
-    | null;
+  tests: {
+    test?: string | null;
+    id?: string | null;
+  }[];
   updatedAt: string;
   createdAt: string;
 }

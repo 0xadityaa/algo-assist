@@ -211,7 +211,7 @@ export default function Home() {
   }
 
   if (!questions) {
-    return <div>Loading...</div>;
+    return <Loading text="Loading Code Playground..." />;
   }
 
   return (
@@ -255,7 +255,7 @@ export default function Home() {
                   <b>Topics: </b>
                   {questions[0].topics?.map((topic) => (
                     typeof topic === 'object' && topic !== null ? (
-                      <Badge key={topic.id} variant={"secondary"}>
+                      <Badge key={topic.id} variant={"secondary"} className="space-x-2 m-1">
                         {topic.name.toLocaleLowerCase()}
                       </Badge>
                     ) : null
@@ -264,9 +264,9 @@ export default function Home() {
                 <br />
                 <>
                   <b>Companies: </b>
-                  {questions[0].companies?.map((company) => (
+                  {questions[0].companies?.length !== undefined && questions[0].companies?.map((company) => (
                     typeof company === 'object' && company !== null ? (
-                      <Badge key={company.id} variant={"outline"}>
+                      <Badge key={company.id} variant={"outline"} className="space-x-2 m-1">
                         {company.name.toLocaleLowerCase()}
                       </Badge>
                     ) : (
@@ -340,7 +340,7 @@ export default function Home() {
                     Output <span className="ml-2 text-2xl">📤</span>
                   </h2>
                   <div className="flex h-auto w-auto items-center justify-start overflow-x-auto p-4">
-                    {results ? (
+                    {!results ? (
                       <div className="space-y-4">
                         {questions?.[0]?.tests &&
                           questions[0].tests.map((testCase, index) => {
